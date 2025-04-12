@@ -74,7 +74,7 @@ def choose_between_multiple_identitites(session, request, soup):
     except:
         raise Exception(f"Wrongly entered identity")
     request = session.post(request.url, data=data)
-    soup = BeautifulSoup(request.text, "xml")
+    soup = BeautifulSoup(request.text, "html.parser")
     return request, soup
 
 def __generate_random_string():
