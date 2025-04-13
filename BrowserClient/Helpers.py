@@ -64,7 +64,7 @@ def choose_between_multiple_identitites(session, request, soup):
     for i, login_option in enumerate(login_options):
         print(f'{i+1}: {login_option.select_one("div.list-link-text").string}')
         identities.append(i+1)
-    identity = input("Enter the identity you want to use:\n").strip()
+    identity = identities[0]#input("Enter the identity you want to use:\n").strip()
     try:
         if int(identity) in identities:
             selected_option = login_options[int(identity)-1].a["data-loginoptions"]
