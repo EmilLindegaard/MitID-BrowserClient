@@ -263,6 +263,7 @@ class BrowserClient():
 
     def authenticate_with_app(self):
         self.__select_authenticator("APP")
+        qr_display_thread = None
 
         r = self.session.post(f"https://www.mitid.dk/mitid-code-app-auth/v1/authenticator-sessions/web/{self.current_authenticator_session_id}/init-auth", json={})
         if r.status_code != 200:
