@@ -282,7 +282,7 @@ class BrowserClient():
         print(message)
         requests.post("https://ntfy.sh/" + topic,
             data=message,
-            headers={"Click": "://MitID",
+            headers={"Click": "https://appswitch.mitid.dk",
                      "Title": "MitID Login"})
         qr_stop_event = None
         while True:
