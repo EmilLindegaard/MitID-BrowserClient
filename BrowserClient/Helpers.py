@@ -26,7 +26,7 @@ def process_args(args):
 
 # get_authentication_code is generally generic enough that you do not need to create your own
 # calls to BrowserClient
-def get_authentication_code(session, aux, method, user_id, password):
+def get_authentication_code(session, aux, method, user_id, password, topic):
     client_hash = binascii.hexlify(base64.b64decode(aux["coreClient"]["checksum"])).decode('ascii')
     authentication_session_id = aux["parameters"]["authenticationSessionId"]
 
@@ -40,7 +40,7 @@ def get_authentication_code(session, aux, method, user_id, password):
         MitIDClient.authenticate_with_token(token_digits)
         MitIDClient.authenticate_with_password(password)
     elif method == "APP" and "APP" in available_authenticators:
-        MitIDClient.authenticate_with_app()
+        MitIDClient.authenticate_with_app(topic)
     elif method == "TOKEN" and "TOKEN" not in available_authenticators:
         raise Exception(f"Token authentication method chosen but not available for MitID user")
     elif method == "APP" and "APP" not in available_authenticators:    

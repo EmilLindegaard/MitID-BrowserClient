@@ -1,4 +1,4 @@
-import requests, time, hashlib, base64, hmac, qrcode, os, threading, json
+import requests, time, hashlib, base64, hmac, qrcode, os, threading, json, requests
 from BrowserClient.CustomSRP import CustomSRP, hex_to_bytes, bytes_to_hex, pad
 
 class BrowserClient():
@@ -261,7 +261,7 @@ class BrowserClient():
         self.finalization_authentication_session_id = r["nextSessionId"]
         print("Password was accepted, you can now finalize authentication and receive your authorization code")
 
-    def authenticate_with_app(self):
+    def authenticate_with_app(self,topic):
         self.__select_authenticator("APP")
         qr_display_thread = None
 
@@ -277,7 +277,13 @@ class BrowserClient():
 
         poll_url = r["pollUrl"]
         ticket = r["ticket"]
-        print("Login request has been made, open your MitID app now")
+
+        message = "Login request has been made, open your MitID app now"
+        print(message)
+        requests.post("https://ntfy.sh/" + topic,
+            data=message,
+            headers={"Click": "://MitID",
+                     "Title": "MitID Login"})
         qr_stop_event = None
         while True:
             r = self.session.post(poll_url, json={"ticket": ticket})
@@ -286,7 +292,11 @@ class BrowserClient():
                 continue
 
             if r.status_code == 200 and r.json()["status"] == "channel_validation_otp":
-                print(f"Please use the following OTP code in the app: {r.json()['channelBindingValue']}")
+                otp = r.json()['channelBindingValue']
+                print(f"Please use the following OTP code in the app: {otp}")
+                requests.post("https://ntfy.sh/" + topic,
+                              data=str(otp),
+                              headers={"Title": "MitID Login"})
                 continue
 
             if r.status_code == 200 and r.json()["status"] == "channel_validation_tqr":
@@ -321,14 +331,22 @@ class BrowserClient():
                 if qr_display_thread and qr_display_thread.is_alive():
                     qr_stop_event.set()
                     qr_display_thread.join()
-                print("The OTP/QR code has been verified, now waiting user to approve login")
+                message = "The QR code has been verified, now waiting user to approve login"
+                print(message)
+                requests.post("https://ntfy.sh/" + topic,
+                              data=message,
+                              headers={"Title": "MitID Login"})
                 continue
 
             if not (r.status_code == 200 and r.json()["status"] == "OK" and r.json()["confirmation"] == True):
                 if qr_display_thread and qr_display_thread.is_alive():
                     qr_stop_event.set()
                     qr_display_thread.join()
-                print("Login request was not accepted")
+                message = "Login request was not accepted"
+                print(message)
+                requests.post("https://ntfy.sh/" + topic,
+                              data=message,
+                              headers={"Title": "MitID Login"})
                 raise Exception(r.content)
 
             break
